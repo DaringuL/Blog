@@ -5,20 +5,19 @@ const ejs = require("ejs");
 const lodash = require('lodash');
 const mongoose = require("mongoose");
 
-const homeStartingContent = "Lacus vel facilisis volutpat est velit egestas dui id ornare. Semper auctor neque vitae tempus quam. Sit amet cursus sit amet dictum sit amet justo. Viverra tellus in hac habitasse. Imperdiet proin fermentum leo vel orci porta. Donec ultrices tincidunt arcu non sodales neque sodales ut. Mattis molestie a iaculis at erat pellentesque adipiscing. Magnis dis parturient montes nascetur ridiculus mus mauris vitae ultricies. Adipiscing elit ut aliquam purus sit amet luctus venenatis lectus. Ultrices vitae auctor eu augue ut lectus arcu bibendum at. Odio euismod lacinia at quis risus sed vulputate odio ut. Cursus mattis molestie a iaculis at erat pellentesque adipiscing.";
-const aboutContent = "Hac habitasse platea dictumst vestibulum rhoncus est pellentesque. Dictumst vestibulum rhoncus est pellentesque elit ullamcorper. Non diam phasellus vestibulum lorem sed. Platea dictumst quisque sagittis purus sit. Egestas sed sed risus pretium quam vulputate dignissim suspendisse. Mauris in aliquam sem fringilla. Semper risus in hendrerit gravida rutrum quisque non tellus orci. Amet massa vitae tortor condimentum lacinia quis vel eros. Enim ut tellus elementum sagittis vitae. Mauris ultrices eros in cursus turpis massa tincidunt dui.";
-const contactContent = "Scelerisque eleifend donec pretium vulputate sapien. Rhoncus urna neque viverra justo nec ultrices. Arcu dui vivamus arcu felis bibendum. Consectetur adipiscing elit duis tristique. Risus viverra adipiscing at in tellus integer feugiat. Sapien nec sagittis aliquam malesuada bibendum arcu vitae. Consequat interdum varius sit amet mattis. Iaculis nunc sed augue lacus. Interdum posuere lorem ipsum dolor sit amet consectetur adipiscing elit. Pulvinar elementum integer enim neque. Ultrices gravida dictum fusce ut placerat orci nulla. Mauris in aliquam sem fringilla ut morbi tincidunt. Tortor posuere ac ut consequat semper viverra nam libero.";
+const homeStartingContent = "This is personal blog of Liubov Dzhochka. It was created as a part of WebDeveloper Bootcamp.";
+const aboutContent = "Hi! My name is Liubov. I graduated from medical university and completed specialization in Ophthalmology... but Computer Science always was my passion. So one day I decided to become Web Developer.";
+const contactContent = "love.dzh.r@gmail.com";
 
 const app = express();
 let posts = [];
-app.set('view engine', 'ejs');
 
+app.set('view engine', 'ejs');
 app.use(express.urlencoded({extended: true}));
 app.use(express.static("public"));
 
+//initial setting of DB
 mongoose.connect("mongodb://localhost:27017/blogDB", {useNewUrlParser : true});
-
- //posts collection
 const postSchema = new mongoose.Schema({
     postTitle: String,
     postContent: String
@@ -27,32 +26,15 @@ const postSchema = new mongoose.Schema({
 const Post = mongoose.model("Post", postSchema);
 
 
-//users collection
-const userSchema = new mongoose.Schema({
-  name: String,
-  age: Number,
-  email: String
-});
-
-const User = mongoose.model("User", userSchema);
-
-const user = new User({
-  name: "Liubov",
-  age: 25,
-  email: "Love.dzh.r@gamil.com"
-});
-
-// user.save();
 function updatePosts() {
 Post.find(function(err, postCollection){
   if (err) {
     console.log(err)
-  }else{
-
+  } else {
     posts = postCollection;
-    posts.forEach(function(post) {console.log(post.postTitle)});
   }
 })
+
 }
 
 
@@ -76,30 +58,31 @@ res.render("compose.ejs", {});
 })
 
 app.get("/posts/:title", function(req, res) {
+
 var userRequestTitle = req.params.title;
 userRequestTitle = transformPostTitle(userRequestTitle);
 let foundMatch = posts.find(({postTitle}) => transformPostTitle(postTitle) === userRequestTitle);
 
 if (foundMatch != undefined) {
   res.render("post", {post : foundMatch});
+} else {
+  let errorPost = {
+    postTitle: "Ooops... Something went wrong",
+    postContent:"Post with such name doesn't exist. Try another name, please"};
+  res.render("post", {post: errorPost});
 }
 
 })
 
 
 app.post("/compose", function(req, res){
-// var post = { postTitle: req.body.postTitle,
-//              postContent: req.body.postContent
-//             }
-// posts.push(post);
-
-const postDB = new Post({
-  postTitle: req.body.postTitle,
-  postContent: req.body.postContent
-});
- postDB.save();
-updatePosts();
-res.redirect("/")
+  const post = new Post({
+    postTitle: req.body.postTitle,
+    postContent: req.body.postContent
+  });
+  post.save();
+  updatePosts();
+  res.redirect("/");
 })
 
 
@@ -108,9 +91,6 @@ function transformPostTitle(title) {
   return title
 }
 
-Post.deleteOne({id: "62e9118581cffb8a41b99823"}, function(err){
-  if (err) {console.log(err);} else {console.log("Deleted duplicate");}
-});
 
 app.listen(3000, function() {
   console.log("Server started on port 3000");

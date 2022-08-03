@@ -4,7 +4,7 @@
 <%= homeStartingContent %>
 
 <% posts.forEach(function(post) { %>
-  <h1 href="/posts/<%=post.postTitle%>"> <%=post.postTitle%> </h1>
+  <h1><a  href="/posts/<%=post.postTitle%>"><%=post.postTitle%> </a> </h1>
 
 <%   var content = post.postContent %>
 
